@@ -1,0 +1,73 @@
+<h1>Orb_inal txid codec</h1>
+<form id="encode" action="/" method="post">
+    <fieldset>
+    <label for="txid">txid: </label>
+    <input type="text" name="sub_txid" id="txid" value="<%= txid %>">
+    <button type="button" onclick="sub_encode()">Encode</button>
+</fieldset>
+</form>
+<div>
+    
+</div>
+
+<hr>
+<div>
+    <input type="file" name="imgUpload" id="imgUpload" accept="image/jpeg, image/png, image/jpg">
+    <button id="upload" onclick="uploadFile()" >Upload/Decode</button>
+</div>
+
+ 
+
+
+<% if (genImage) { %>
+
+<p>Server generated encoding</p>
+
+<img id="serverImg" src="data:image/png;base64,<%= genImage %>" alt="">
+<% } %>
+
+<div id="decoded"></div>
+
+<script>
+    
+    // move all these to server side and send back an image
+    var colours = <%-JSON.stringify(colour_arr)%>;
+    var serverImg = document.getElementById('serverImg');
+    var uploadButton = document.getElementById('upload')
+    var decodedDiv = document.getElementById('decoded')
+
+    function sub_encode() {
+        in_txid = document.getElementById("txid")
+        if (in_txid.value.length == 64) {
+            document.forms["encode"].submit();
+        } else {
+            window.alert("txid doesn't look right")
+        }
+        
+    }
+
+    function uploadFile() {
+        fileInput = document.getElementById('imgUpload')
+        file = fileInput.files[0]
+        const fd = new FormData();
+        fd.append('image', file)
+        endcodedvalue = decodedDiv.appendChild(document.createElement("p"))
+        // Send a POST request
+        fetch('/decode', {
+            method: 'POST',
+            body: fd
+        })
+        .then(res => res.json())
+        .then(json => {
+        endcodedvalue.innerText = 'decoded txid: '+String(json.data.txid)
+        }
+
+        )
+        .catch(err => console.error(err));
+    
+        };
+
+        
+
+</script>
+

@@ -1,0 +1,143 @@
+<h1>Test converting txid to colours</h1>
+<form id="encode" action="/" method="post">
+    <fieldset>
+    <label for="txid">txid: </label>
+    <input type="text" name="sub_txid" id="txid" value="<%= txid %>">
+    <button onclick="sub_encode()">Encode</button>
+</fieldset>
+</form>
+
+<input type="file" name="imgUpload" id="imgUpload" accept="image/jpeg, image/png, image/jpg">
+<button id="upload" onclick="uploadFile()" >Upload/Decode</button>
+ 
+
+
+
+<div id="status"></div>
+<p>Original:</p>
+<canvas id="example" width="550" height="550"></canvas>
+
+<p>Server generated encoding</p>
+<img id="serverImg" src="/images/<%= txid %>.png" alt="">
+
+<p>Decoded intermediate step, client side, move this to server:</p>
+<div id="output"></div>
+<script>
+    // move all these to server side and send back an image
+    var colours = <%-JSON.stringify(colour_arr)%>;
+    var example = document.getElementById('example');
+    var serverImg = document.getElementById('serverImg');
+    var output = document.getElementById('output');
+    var context = example.getContext('2d');
+    
+    var uploadButton = document.getElementById('upload')
+    
+    for(var i =0; i < 11; i++) {
+
+        if( i == 10) {
+            colour = colours[i-1].substring(4,6) + colours[i] 
+            
+        } else {
+            colour = colours[i]
+        }
+        
+        context.fillStyle = "#"+colour;
+        context.fillRect(0,i*50,550,50);
+        context.fillStyle = "black";
+        context.font = "12px serif";
+        context.fillText(colour,0,(i+1)*50);
+    }
+
+    html2canvas(document.querySelector("#example")).then(function(canvas) {
+        canvas.id = "newCanvas"
+        output.appendChild(canvas);
+        example.style.display = "none";
+        $('#newCanvas').click(function(e) {
+            var pos = findPos(this);
+            var x = e.pageX - pos.x;
+            var y = e.pageY - pos.y;
+            var coord = "x=" + x + ", y=" + y;
+            var c = this.getContext('2d');
+            var p = c.getImageData(x, y, 1, 1).data; 
+            var hex = "#" + ("000000" + rgbToHex(p[0], p[1], p[2])).slice(-6);
+            console.log(hex)
+            $('#status').html(coord + "<br>" + hex);
+        })
+        $('#example').click(function(e) {
+            var pos = findPos(this);
+            var x = e.pageX - pos.x;
+            var y = e.pageY - pos.y;
+            var coord = "x=" + x + ", y=" + y;
+            var c = this.getContext('2d');
+            var p = c.getImageData(x, y, 1, 1).data; 
+            var hex = "#" + ("000000" + rgbToHex(p[0], p[1], p[2])).slice(-6);
+            console.log(hex)
+            $('#status').html(coord + "<br>" + hex);
+        })
+    })
+
+
+    html2canvas(document.querySelector("#serverImg")).then(function(canvas) {
+        canvas.id = "newCanvas"
+        output.appendChild(canvas);
+        
+         $('#newCanvas').click(function(e) {
+             var pos = findPos(this);
+             var x = e.pageX - pos.x;
+             var y = e.pageY - pos.y;
+             var coord = "x=" + x + ", y=" + y;
+             var c = this.getContext('2d');
+             var p = c.getImageData(x, y, 1, 1).data; 
+             var hex = "#" + ("000000" + rgbToHex(p[0], p[1], p[2])).slice(-6);
+             console.log(hex)
+             $('#status').html(coord + "<br>" + hex);
+         })
+     })
+
+
+
+    function findPos(obj) {
+        var curleft = 0, curtop = 0;
+        if (obj.offsetParent) {
+            do {
+                curleft += obj.offsetLeft;
+                curtop += obj.offsetTop;
+            } while (obj = obj.offsetParent);
+            return { x: curleft, y: curtop };
+        }
+        return undefined;
+    }
+    
+    function rgbToHex(r, g, b) {
+        if (r > 255 || g > 255 || b > 255)
+            throw "Invalid color component";
+        return ((r << 16) | (g << 8) | b).toString(16);
+    }
+
+
+    function sub_encode() {
+        document.forms["encode"].submit();
+    }
+
+
+function uploadFile() {
+    fileInput = document.getElementById('imgUpload')
+    file = fileInput.files[0]
+    const fd = new FormData();
+    fd.append('image', file)
+
+    // Send a POST request
+    fetch('/decode', {
+        method: 'POST',
+        body: fd
+    })
+    .then(res => res.json())
+    .then(json => console.log(json))
+    .catch(err => console.error(err));
+
+    };
+
+        
+
+</script>
+
