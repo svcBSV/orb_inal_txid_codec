@@ -2,7 +2,7 @@
 test encoding of txid into an image for later reference
 
 ## run the demo with:
-npm i
+npm i,
 npm run devStart
 
 ## goals
