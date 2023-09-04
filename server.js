@@ -82,7 +82,7 @@ app.post('/', async(req, res) => {
             endAngle = Math.round(startAngle - 10)
         }
 
-        drawWidth = 50
+        drawWidth = 40
         radius = Math.round((width/2.5)-(i*18))
 
         context.arc(x,y,radius,startAngle,endAngle,false);
@@ -112,9 +112,9 @@ app.post('/', async(req, res) => {
     }
     
     // resize and send as base64
-    const output = createCanvas(275,275)
+    const output = createCanvas(200,200)
     const ouputctx = output.getContext("2d")
-    ouputctx.drawImage(canvas,0,0,275,275)
+    ouputctx.drawImage(canvas,0,0,200,200)
     const buffer =canvas.toBuffer("image/png")
     
     base64Img = getBase64Image(output)
